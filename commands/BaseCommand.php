@@ -1,6 +1,5 @@
 <?php
 
-
 require_once __DIR__ . '/../FileSystem.php';
 require_once __DIR__ . '/../Command.php';
 

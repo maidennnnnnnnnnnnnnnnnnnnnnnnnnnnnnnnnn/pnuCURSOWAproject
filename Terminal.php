@@ -6,11 +6,13 @@ require_once __DIR__ . '/commands/DeleteCommand.php';
 require_once __DIR__ . '/commands/MoveCommand.php';
 require_once __DIR__ . '/commands/EditCommand.php';
 require_once __DIR__ . '/commands/ChangeDirectoryCommand.php';
+require_once __DIR__ . '/commands/ShowCommand.php';
+require_once __DIR__ . '/commands/HelpCommand.php';
 
 $fileSystem = new FileSystem();
 
 echo "Welcome to the simulated terminal!\n";
-echo "Available commands: create, delete, move, edit, show, enter, su, exit\n";
+echo "Available commands: create, delete, move, edit, show, enter, help, exit\n";
 
 while (true) {
     echo "Terminal> ";
@@ -48,9 +50,12 @@ while (true) {
             echo "Exiting terminal...\n";
             exit;
 
+        case 'help':
+            (new HelpCommand($fileSystem))->execute();
+            break;
+
         default:
             echo "Unknown command: $command\n";
             break;
     }
 }
-
