@@ -4,17 +4,10 @@ require_once __DIR__ . '/BaseCommand.php';
 
 class ShowCommand extends BaseCommand
 {
-    private $name;
-
-    public function __construct(FileSystem $fileSystem, $name)
+    public function execute(array $args)
     {
-        parent::__construct($fileSystem);
-        $this->name = $name;
-    }
-
-    public function execute()
-    {
-        $this->fileSystem->show($this->name);
+        $name = array_shift($args);
+        FileSystem::getInstance()->show($name);
     }
 
 }

@@ -14,48 +14,33 @@ $fileSystem = new FileSystem();
 echo "Welcome to the simulated terminal!\n";
 echo "Available commands: create, delete, move, edit, show, enter, help, exit\n";
 
+$commands = [
+    'create' => new CreateCommand(),
+    'delete' => new DeleteCommand(),
+    'move' => new MoveCommand(),
+    'edit' => new EditCommand(),
+    'help' => new HelpCommand(),
+    'enter' => new ChangeDirectoryCommand(),
+    'show' => new ShowCommand(),
+    'exit' => new class extends BaseCommand {
+
+        public function execute(array $args)
+        {
+            exit;
+        }
+    }
+];
+
 while (true) {
     echo "Terminal> ";
     $input = trim(fgets(STDIN));
     $parts = explode(' ', $input);
 
-    $command = $parts[0] ?? null;
+    $command = array_shift($parts);
 
-    switch ($command) {
-        case 'create':
-            (new CreateCommand($fileSystem, $parts[1] ?? ''))->execute();
-            break;
-
-        case 'delete':
-            (new DeleteCommand($fileSystem, $parts[1] ?? ''))->execute();
-            break;
-
-        case 'move':
-            (new MoveCommand($fileSystem, $parts[1] ?? '', $parts[2] ?? '/'))->execute();
-            break;
-
-        case 'edit':
-            (new EditCommand($fileSystem, $parts[1] ?? '', $parts[2] ?? ''))->execute();
-            break;
-
-        case 'show':
-            (new ShowCommand($fileSystem, $parts[1] ?? ''))->execute();
-            break;
-
-        case 'enter':
-            (new ChangeDirectoryCommand($fileSystem, $parts[1] ?? '/'))->execute();
-            break;
-
-        case 'exit':
-            echo "Exiting terminal...\n";
-            exit;
-
-        case 'help':
-            (new HelpCommand($fileSystem))->execute();
-            break;
-
-        default:
-            echo "Unknown command: $command\n";
-            break;
+    if(array_key_exists($command, $commands)){
+        $commands[$command]->execute($parts);
+    }else{
+        echo "Unknown command: $command\n";
     }
 }

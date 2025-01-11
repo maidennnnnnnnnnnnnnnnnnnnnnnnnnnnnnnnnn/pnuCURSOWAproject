@@ -1,15 +1,27 @@
 <?php
 
-class FileSystem {
+class FileSystem
+{
     private $structure = [];
     private $currentPath = '/';
 
+    private static $instance;
 
-    public function getCurrentPath() {
+    public static function getInstance()
+    {
+        if (!isset(self::$instance)) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    public function getCurrentPath()
+    {
         return $this->currentPath;
     }
 
-    public function createFile($name) {
+    public function createFile($name)
+    {
         if (isset($this->structure[$this->currentPath][$name])) {
             echo "Error: A file or folder named '$name' already exists.\n";
             return;
@@ -19,21 +31,23 @@ class FileSystem {
         echo "Created file: $name\n";
     }
 
-    public function createFolder($name) {
-    if (isset($this->structure[$this->currentPath][$name])) {
-        echo "Error: A file or folder named '$name' already exists.\n";
-        return;
+    public function createFolder($name)
+    {
+        if (isset($this->structure[$this->currentPath][$name])) {
+            echo "Error: A file or folder named '$name' already exists.\n";
+            return;
+        }
+
+        $this->structure[$this->currentPath][$name] = [];
+
+        $folderPath = rtrim($this->currentPath, '/') . '/' . ltrim($name, '/');
+        $this->structure[$folderPath] = [];
+
+        echo "Created folder: $name\n";
     }
 
-    $this->structure[$this->currentPath][$name] = [];
-
-    $folderPath = rtrim($this->currentPath, '/') . '/' . ltrim($name, '/');
-    $this->structure[$folderPath] = [];
-
-    echo "Created folder: $name\n";
-}
-
-    public function delete($name) {
+    public function delete($name)
+    {
         if (isset($this->structure[$this->currentPath][$name])) {
             unset($this->structure[$this->currentPath][$name]);
             echo "Deleted: $name\n";
@@ -42,47 +56,50 @@ class FileSystem {
         }
     }
 
-    public function move($name, $newPath) {
-    echo "Debug: Moving $name to $newPath\n";
+    public function move($name, $newPath)
+    {
+        echo "Debug: Moving $name to $newPath\n";
 
-    if (!isset($this->structure[$this->currentPath][$name])) {
-        echo "Error: File or directory not found: $name\n";
-        return;
+        if (!isset($this->structure[$this->currentPath][$name])) {
+            echo "Error: File or directory not found: $name\n";
+            return;
+        }
+
+        $resolvedPath = $this->resolvePath($newPath);
+        echo "Debug: Resolved Path: $resolvedPath\n";
+
+        $resolvedPath = rtrim($resolvedPath, '/');
+
+        if (!isset($this->structure[$resolvedPath]) || !is_array($this->structure[$resolvedPath])) {
+            echo "Error: Destination folder does not exist: $newPath\n";
+            return;
+        }
+
+        $this->structure[$resolvedPath][$name] = $this->structure[$this->currentPath][$name];
+        unset($this->structure[$this->currentPath][$name]);
+
+        echo "Moved $name to $resolvedPath\n";
     }
 
-    $resolvedPath = $this->resolvePath($newPath);
-    echo "Debug: Resolved Path: $resolvedPath\n";
+    private function resolvePath($path)
+    {
+        if ($path === '/') {
+            return '/';
+        }
 
-    $resolvedPath = rtrim($resolvedPath, '/');
+        if ($path === '..') {
+            return dirname($this->currentPath);
+        }
 
-    if (!isset($this->structure[$resolvedPath]) || !is_array($this->structure[$resolvedPath])) {
-        echo "Error: Destination folder does not exist: $newPath\n";
-        return;
+        if (str_starts_with($path, '/')) {
+            return rtrim($path, '/');
+        }
+
+        return rtrim($this->currentPath, '/') . '/' . ltrim($path, '/');
     }
 
-    $this->structure[$resolvedPath][$name] = $this->structure[$this->currentPath][$name];
-    unset($this->structure[$this->currentPath][$name]);
-
-    echo "Moved $name to $resolvedPath\n";
-}
-
-    private function resolvePath($path) {
-    if ($path === '/') {
-        return '/';
-    }
-
-    if ($path === '..') {
-        return dirname($this->currentPath);
-    }
-
-    if (str_starts_with($path, '/')) {
-        return rtrim($path, '/');
-    }
-
-    return rtrim($this->currentPath, '/') . '/' . ltrim($path, '/');
-}
-
-    public function edit($name, $content) {
+    public function edit($name, $content)
+    {
         if ($this->structure[$this->currentPath][$name] ?? null === 'file') {
             $this->structure[$this->currentPath][$name] = $content;
             echo "Edited file $name\n";
@@ -91,7 +108,8 @@ class FileSystem {
         }
     }
 
-    public function changeDirectory($path) {
+    public function changeDirectory($path)
+    {
         if ($path === '..') {
             if ($this->currentPath !== '/') {
                 $this->currentPath = dirname($this->currentPath);
@@ -110,7 +128,8 @@ class FileSystem {
         }
     }
 
-    public function show($name = null) {
+    public function show($name = null)
+    {
         if ($name == null) {
             $this->listContents();
             return;
@@ -132,7 +151,8 @@ class FileSystem {
 
     }
 
-    public function listContents() {
+    public function listContents()
+    {
         echo "Current Path: " . $this->currentPath . "\n";
         echo "Contents:\n";
 
@@ -145,16 +165,16 @@ class FileSystem {
         }
     }
 
-    private function listFolderContents($folderName) {
-    $folderName = rtrim($folderName, '/');
-    if (isset($this->structure[$this->currentPath][$folderName]) && is_array($this->structure[$this->currentPath][$folderName])) {
-        echo "Contents of folder $folderName:\n";
-        foreach ($this->structure[$this->currentPath][$folderName] as $name => $type) {
-            echo "- $name (" . (is_array($type) ? 'folder' : 'file') . ")\n";
+    private function listFolderContents($folderName)
+    {
+        $folderName = rtrim($folderName, '/');
+        if (isset($this->structure[$this->currentPath][$folderName]) && is_array($this->structure[$this->currentPath][$folderName])) {
+            echo "Contents of folder $folderName:\n";
+            foreach ($this->structure[$this->currentPath][$folderName] as $name => $type) {
+                echo "- $name (" . (is_array($type) ? 'folder' : 'file') . ")\n";
+            }
+        } else {
+            echo "Error: $folderName is not a valid folder or does not exist.\n";
         }
-    } else {
-        echo "Error: $folderName is not a valid folder or does not exist.\n";
     }
-}
-
 }

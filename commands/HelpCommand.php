@@ -4,11 +4,7 @@ require_once __DIR__ . '/BaseCommand.php';
 
 class HelpCommand extends BaseCommand {
 
-    public function __construct(FileSystem $fileSystem) {
-        parent::__construct($fileSystem);
-    }
-
-    public function execute() {
+    public function execute(array $args) {
         echo "Available commands and usage:\n";
         echo "------------------------------\n";
         echo "create [name] - Creates a new file or folder. If [name] ends with '/', it's a folder, otherwise a file.\n";

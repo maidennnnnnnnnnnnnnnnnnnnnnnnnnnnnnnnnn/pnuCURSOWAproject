@@ -1,16 +1,9 @@
 <?php
 
 require_once __DIR__ . '/../FileSystem.php';
-require_once __DIR__ . '/../Command.php';
 
-abstract class BaseCommand implements Command
+abstract class BaseCommand
 {
-    protected $fileSystem;
+    public abstract function execute(array $args);
 
-    public function __construct(FileSystem $fileSystem)
-    {
-        $this->fileSystem = $fileSystem;
-    }
-
-    abstract public function execute();
 }

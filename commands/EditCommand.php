@@ -3,16 +3,10 @@
 require_once __DIR__ . '/BaseCommand.php';
 
 class EditCommand extends BaseCommand {
-    private $name;
-    private $content;
 
-    public function __construct(FileSystem $fileSystem, $name, $content) {
-        parent::__construct($fileSystem);
-        $this->name = $name;
-        $this->content = $content;
-    }
-
-    public function execute() {
-        $this->fileSystem->edit($this->name, $this->content);
+    public function execute(array $args) {
+        $name = array_shift($args);
+        $content = implode(' ', $args);
+        FileSystem::getInstance()->edit($name, $content);
     }
 }
